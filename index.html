@@ -35,11 +35,25 @@
       drops[i] = -1;
     }
 
+    function isCharacterInColorRange(charCode) {
+      const colorRanges = [
+        [0x1F600, 0x1F64F], // Emoticons
+        [0x1F680, 0x1F6FF], // Transport and Map symbols
+        [0x1F900, 0x1F9FF], // Supplemental Symbols and Pictographs
+        [0x1FA70, 0x1FAFF], // Symbols and Pictographs Extended-A
+      ];
+
+      return colorRanges.some(([start, end]) => charCode >= start && charCode <= end);
+    }
+
     function getRandomChar() {
       let charCode;
       do {
         charCode = Math.floor(Math.random() * 65536);
-      } while (charCode >= 0xD800 && charCode <= 0xDFFF); // Surrogate pairs
+      } while (
+        (charCode >= 0xD800 && charCode <= 0xDFFF) || // Surrogate pairs
+        isCharacterInColorRange(charCode) // Color characters
+      );
       return String.fromCharCode(charCode);
     }
 
