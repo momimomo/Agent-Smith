@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix Rain Effect</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: black;
+    }
+
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrixCanvas"></canvas>
+  <script>
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+    const drops = [];
+
+    for (let i = 0; i < columns; i++) {
+      drops[i] = -1;
+    }
+
+    function getRandomChar() {
+      let charCode;
+      do {
+        charCode = 0x2000 + Math.floor(Math.random() * 0x9fff);
+      } while (
+        (charCode >= 0xd800 && charCode <= 0xdfff) ||
+        (charCode >= 0x1f300 && charCode <= 0x1f5ff) ||
+        (charCode >= 0x1f900 && charCode <= 0x1f9ff) ||
+        (charCode >= 0x1f600 && charCode <= 0x1f64f)
+      );
+
+      return String.fromCharCode(charCode);
+    }
+
+    const asciiArt = [
+    "                               .;'.'o0KXNNNNNNWWWWWWWWWNNNNXXX0c....                                ",
+"                              .'..,oOKKXNNNWWWWWWWWWWWWNNNNXXXKOl'..                                ",
+"                             ....'lk0KXXNNNWWWWWWWWWWWNNNNNXXXK0Ol...                               ",
+"                             ....;ldO0KXNNNWWWWWWWWWWWWWWWNNXK00ko;....                             ",
+"            .                . ..;clxOKXXNNWWWWWWWWWWWWWWWNXXK0Odc;. ...           ....             ",
+"     ...........   .        .   .':cldOKXXNWWMMWWWWWWWWWWWNXKKOdc:,.  ..     ............           ",
+"   ...':llloddddoc::,..     .    .;codx0XXNNWWWWWMWWWWWWWNNXXKkdl:'    .   ...':oooddxxxolcc;..     ",
+"  .''lOXNNNWWWWWNNNX0o,.    .    .;cdxddk0KXXNNWWWWWWWWWNXXKOxdxdc'       .''cOXNNNWWWWWNNNXKd;.    ",
+" ...l0KXNNWWWWWWWNNXXKd,.        .'...   ..,:cldOO00Okdlc:,..  ....      ...cOKXNNWWWWWWNNNNXKx,.   ",
+" ..,lkKXNWWWWWWWWWNXK0x:..       ..            .;ldxo;.              .   ..'ok0XNWWWWWWWWWWNK0kc... ",
+"   ':okKXNWMWWWWWWNXKkl,. . ...  ...           'dOKNKd'             ...    .lxk0XNWWWWWWWWNXKko;. . ",
+"   .;coOXNWWWWWWWWNX0xl,   .,'.. .;;'..       .oKKXNXKo.        .....,,.   .:dkOKNNWWWWWWWNX0ko,    ",
+"   .....,:ldk00Oxoc;'...   .::,. .':olc:;;;;,,cOXNWWNKkl;;,,,;:cc;...;,    .','.,:cox00Oxoc;'',.    ",
+"            'dkc.        . .,lc'...';ldddddxxdokXNWWN0xoddooodol:'..cc.  .  .       .dOl.        .  ",
+"....'..    .lXNO,     ...'. .,cc,...';coodxkxl;,:lool;,cdxdoooc;...;l;  .'..''.     cKN0:     ...'. ",
+",;..,clc:::cONWKdc:::c:..;.   .;;.....':odxkxd;.      'lxkxddl;...';'   ':..,llcc::ckNWXxc:::cc'.;. ",
+".:;..':odxxc:dxlcddoo:'.;;     .,;....';odxk0Oxc'.. .:dO0Okxoc'....'.   .;:..;codxxl:odl:oxolc'.;;. ",
+" .''..':dxko.  .cxkdc'.''.     .c:....',lddxkkdo:;,,;cldxxxdl;...         ''.,:coxkd,  .cxkdc,..'.  ",
+"  .,...;odxdc'.:oxxo;...       .:;. ...':lc;;;;;;;::;;;;;;::;'..          .;..;:ldxdc'':oxdl:'..    ",
+"  .;. .';:clllllllc:'.         .cl'  ...',;coooolllllodddl;,'..           .:...,;:cccclccc:;'.      ",
+"  .;'  ..,c;,,,,:c;..           ;o;   ....';:,.........,:;'...            .:,  ..,::,,;,;:;..       ",
+"   ',.  ..';lddo:'..            .l:.    ....',:oxxxkkdc;'....              ;:.  ..':oxxdc'..        ",
+"   .;...  ..',,,'.. .            ;l'..     .';codddxxdl:'.    .            .:...  .',;;,'.  ..      ",
+"   .:'......     ......          'o:.....   .............  ....            .:,......     ......     ",
+"  ..;;,'...........';:'.         ,ol,...''.................';:,..         ..;:;'...........';:,..   ",
+    ];
+
+    let asciiArtDisplayTime = 0;
+    const maxAsciiArtDisplayTime = 40;
+
+    function drawAsciiArt() {
+      ctx.fillStyle = '#00ff00';
+      ctx.font = `${fontSize}px monospace`;
+      const yOffset = (canvas.height / 2) - fontSize * (asciiArt.length / 2);
+      for (let i = 0; i < asciiArt.length; i++) {
+        const textWidth = ctx.measureText(asciiArt[i]).width;
+        const xOffset = (canvas.width - textWidth) / 2;
+        ctx.fillText(asciiArt[i], xOffset, yOffset + i * fontSize);
+      }
+    }
+
+    function drawMatrixRain() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.font = `${fontSize}px monospace`;
+      for (let i = 0; i < drops.length; i++) {
+        const char = getRandomChar();
+
+        ctx.fillStyle = '#00ff00';
+        ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+
+        if (Math.random() < 0.01 || drops[i] * fontSize > canvas.height * 2) {
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      }
+    }
+
+    function draw() {
+      if (asciiArtDisplayTime < maxAsciiArtDisplayTime) {
+        drawAsciiArt();
+        asciiArtDisplayTime++;
+
+        const yOffset = Math.floor((canvas.height / 2) - fontSize * (asciiArt.length / 2));
+        for (let i = 0; i < asciiArt.length; i++) {
+          const textWidth = ctx.measureText(asciiArt[i]).width;
+          const xOffset = Math.floor((canvas.width - textWidth) / 2 / fontSize);
+          for (let j = 0; j < asciiArt[i].length; j++) {
+            if (Math.random() < 0.001 * (1 + asciiArtDisplayTime / maxAsciiArtDisplayTime)) {
+              const x = xOffset + j;
+              if (drops[x] === -1) {
+                drops[x] = yOffset / fontSize + i;
+              }
+            }
+          }
+        }
+      } else {
+        drawMatrixRain();
+      }
+    }
+
+    setInterval(draw, 50);
+  </script>
+</body>
+</html>
+
