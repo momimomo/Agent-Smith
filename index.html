@@ -34,18 +34,33 @@
     }
 
     function getRandomChar() {
-      let charCode;
-      do {
-        charCode = 0x2000 + Math.floor(Math.random() * 0x9fff);
-      } while (
-        (charCode >= 0xd800 && charCode <= 0xdfff) ||
-        (charCode >= 0x1f300 && charCode <= 0x1f5ff) ||
-        (charCode >= 0x1f900 && charCode <= 0x1f9ff) ||
-        (charCode >= 0x1f600 && charCode <= 0x1f64f)
-      );
+  let charCode;
+  do {
+    charCode = Math.floor(Math.random() * 65536);
+  } while (
+    (charCode >= 0x2000 && charCode <= 0x206f) || // General Punctuation
+    (charCode >= 0x20a0 && charCode <= 0x20cf) || // Currency Symbols
+    (charCode >= 0x2100 && charCode <= 0x214f) || // Letterlike Symbols
+    (charCode >= 0x2190 && charCode <= 0x21ff) || // Arrows
+    (charCode >= 0x2200 && charCode <= 0x22ff) || // Mathematical Operators
+    (charCode >= 0x2300 && charCode <= 0x23ff) || // Miscellaneous Technical
+    (charCode >= 0x25a0 && charCode <= 0x25ff) || // Geometric Shapes
+    (charCode >= 0x2600 && charCode <= 0x26ff) || // Miscellaneous Symbols
+    (charCode >= 0x2700 && charCode <= 0x27bf) || // Dingbats
+    (charCode >= 0x3000 && charCode <= 0x303f) || // CJK Symbols and Punctuation
+    (charCode >= 0xfe00 && charCode <= 0xfe0f) || // Variation Selectors
+    (charCode >= 0xff00 && charCode <= 0xffef) || // Halfwidth and Fullwidth Forms
+    (charCode >= 0x1f000 && charCode <= 0x1f02f) || // Mahjong Tiles
+    (charCode >= 0x1f0a0 && charCode <= 0x1f0ff) || // Playing Cards
+    (charCode >= 0x1f300 && charCode <= 0x1f5ff) || // Miscellaneous Symbols and Pictographs
+    (charCode >= 0x1f600 && charCode <= 0x1f64f) || // Emoticons (Emoji)
+    (charCode >= 0x1f900 && charCode <= 0x1f9ff) || // Supplemental Symbols and Pictographs
+    (charCode >= 0x1fa70 && charCode <= 0x1faff)    // Symbols and Pictographs Extended-A
+  );
 
-      return String.fromCharCode(charCode);
-    }
+  return String.fromCharCode(charCode);
+}
+
 
     const asciiArt = [
 "                               .;'.'o0KXNNNNNNWWWWWWWWWNNNNXXX0c....                                ",
