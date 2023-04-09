@@ -22,38 +22,38 @@
   <canvas id="matrixCanvas"></canvas>
   <script>
     const canvas = document.getElementById('matrixCanvas');
-const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-const fontSize = 16;
-const columns = canvas.width / fontSize;
-const drops = [];
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+    const drops = [];
 
-for (let i = 0; i < columns; i++) {
-  drops[i] = -1;
-}
+    for (let i = 0; i < columns; i++) {
+      drops[i] = -1;
+    }
 
-function getRandomChar() {
-  const charRanges = [
-    [0x0020, 0x007F], // Basic Latin
-    [0x4E00, 0x9FFF], // CJK Unified Ideographs
-    [0x30A0, 0x30FF], // Katakana
-  ];
+    function getRandomChar() {
+      const charRanges = [
+        [0x0020, 0x007F], // Basic Latin
+        [0x4E00, 0x9FFF], // CJK Unified Ideographs
+        [0x30A0, 0x30FF], // Katakana
+      ];
 
-  let charCode;
-  do {
-    const rangeIndex = Math.floor(Math.random() * charRanges.length);
-    const [start, end] = charRanges[rangeIndex];
-    charCode = Math.floor(Math.random() * (end - start + 1)) + start;
-  } while (
-    (charCode >= 0xD800 && charCode <= 0xDFFF)
-  );
-  return String.fromCharCode(charCode);
-}
+      let charCode;
+      do {
+        const rangeIndex = Math.floor(Math.random() * charRanges.length);
+        const [start, end] = charRanges[rangeIndex];
+        charCode = Math.floor(Math.random() * (end - start + 1)) + start;
+      } while (
+        (charCode >= 0xD800 && charCode <= 0xDFFF)
+      );
+      return String.fromCharCode(charCode);
+    }
 
-const asciiArt = [
+    const asciiArt = [
       "                               .;'.'o0KXNNNNNNWWWWWWWWWNNNNXXX0c....                                ",
       "                              .'..,oOKKXNNNWWWWWWWWWWWWNNNNXXXKOl'..                                ",
       "                             ....'lk0KXXNNNWWWWWWWWWWWNNNNNXXXK0Ol...                               ",
@@ -81,86 +81,83 @@ const asciiArt = [
       "  ..;;,'...........';:'.         ,ol,...''.................';:,..         ..;:;'...........';:,..   ",
     ];
 
-let asciiArtDisplayTime = 0;
-const maxAsciiArtDisplayTime = 40;
+    let asciiArtDisplayTime = 0;
+    const maxAsciiArtDisplayTime = 40;
 
-function drawAsciiArt() {
-  ctx.fillStyle = '#00ff00';
-  ctx.font = `${fontSize}px monospace`;
-  const yOffset = (canvas.height / 2) - fontSize * (asciiArt.length / 2);
-  for (let i = 0; i < asciiArt.length; i++) {
-    const textWidth = ctx.measureText(asciiArt[i]).width;
-    const xOffset = (canvas.width - textWidth) / 2;
-    ctx.fillText(asciiArt[i], xOffset, yOffset + i * fontSize);
-  }
-}
-// ... Rest of the code above ...
-
-let transitionProgress = 0;
-const transitionDuration = 20000; // 20 seconds in milliseconds
-
-function updateProgress() {
-  transitionProgress += 50;
-  if (transitionProgress > transitionDuration) {
-    transitionProgress = transitionDuration;
-  }
-}
-
-function drawMatrixRain() {
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.font = `${fontSize}px monospace`;
-  for (let i = 0; i < drops.length; i++) {
-    const char = getRandomChar();
-
-    const progress = transitionProgress / transitionDuration;
-    const angle = (i / drops.length) * 2 * Math.PI;
-    const radius = fontSize * drops[i] * progress;
-    const x = (1 - progress) * (i * fontSize) + progress * (canvas.width / 2 + Math.cos(angle) * radius);
-    const y = (1 - progress) * (drops[i] * fontSize) + progress * (canvas.height / 2 + Math.sin(angle) * radius);
-
-    ctx.fillStyle = '#00ff00';
-    ctx.fillText(char, x, y);
-
-    if (Math.random() < 0.01 || drops[i] * fontSize > canvas.height * 2) {
-      drops[i] = 0;
-    }
-
-    drops[i]++;
-  }
-}
-
-function draw() {
-  if (asciiArtDisplayTime < maxAsciiArtDisplayTime) {
-    drawAsciiArt();
-    asciiArtDisplayTime++;
-
-    const yOffset = Math.floor((canvas.height / 2) - fontSize * (asciiArt.length / 2));
-    for (let i = 0; i < asciiArt.length; i++) {
-      const textWidth = ctx.measureText(asciiArt[i]).width;
-      const xOffset = Math.floor((canvas.width - textWidth) / 2 / fontSize);
-      for (let j = 0; j < asciiArt[i].length; j++) {
-        if (Math.random() < 0.001 * (1 + asciiArtDisplayTime / maxAsciiArtDisplayTime)) {
-          const x = xOffset + j;
-          if (drops[x] === -1) {
-            drops[x] = yOffset / fontSize + i;
-          }
-        }
+    function drawAsciiArt() {
+      ctx.fillStyle = '#00ff00';
+      ctx.font = `${fontSize}px monospace`;
+      const yOffset = (canvas.height / 2) - fontSize * (asciiArt.length / 2);
+      for (let i = 0; i < asciiArt.length; i++) {
+        const textWidth = ctx.measureText(asciiArt[i]).width;
+        const xOffset = (canvas.width - textWidth) / 2;
+        ctx.fillText(asciiArt[i], xOffset, yOffset + i * fontSize);
       }
     }
-  } else {
-    drawMatrixRain();
-    updateProgress();
-  }
-}
+    // ... Rest of the code above ...
 
-setInterval(draw, 50);
+    let transitionProgress = 0;
+    const transitionDuration = 20000; // 20 seconds in milliseconds
 
+    function updateProgress() {
+      transitionProgress += 50;
+      if (transitionProgress > transitionDuration) {
+        transitionProgress = transitionDuration;
+      }
+    }
 
+    function drawMatrixRain() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      ctx.font = `${fontSize}px monospace`;
+      for (let i = 0; i < drops.length; i++) {
+        const char = getRandomChar();
 
-    
+        const progress = transitionProgress / transitionDuration;
+        const angle = (i / drops.length) * 2 * Math.PI + progress * 2 * Math.PI;
+        const radiusFactor = progress * 0.5;
+        const maxRadius = Math.max(canvas.width, canvas.height) / 2;
+        const radius = fontSize * drops[i] * (1 - radiusFactor) + maxRadius * radiusFactor;
+        const x = (1 - progress) * (i * fontSize) + progress * (canvas.width / 2 + Math.cos(angle) * radius);
+        const y = (1 - progress) * (drops[i] * fontSize) + progress * (canvas.height / 2 + Math.sin(angle) * radius);
+
+        ctx.fillStyle = '#00ff00';
+        ctx.fillText(char, x, y);
+
+        if (Math.random() < 0.01 || drops[i] * fontSize > canvas.height * 2) {
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      }
+    }
+
+    function draw() {
+      if (asciiArtDisplayTime < maxAsciiArtDisplayTime) {
+        drawAsciiArt();
+        asciiArtDisplayTime++;
+
+        const yOffset = Math.floor((canvas.height / 2) - fontSize * (asciiArt.length / 2));
+        for (let i = 0; i < asciiArt.length; i++) {
+          const textWidth = ctx.measureText(asciiArt[i]).width;
+          const xOffset = Math.floor((canvas.width - textWidth) / 2 / fontSize);
+          for (let j = 0; j < asciiArt[i].length; j++) {
+            if (Math.random() < 0.001 * (1 + asciiArtDisplayTime / maxAsciiArtDisplayTime)) {
+              const x = xOffset + j;
+              if (drops[x] === -1) {
+                drops[x] = yOffset / fontSize + i;
+              }
+            }
+          }
+        }
+      } else {
+        drawMatrixRain();
+        updateProgress();
+      }
+    }
+
+    setInterval(draw, 50);
 
   </script>
 </body>
