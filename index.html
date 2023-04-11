@@ -37,9 +37,13 @@
 
     function getRandomChar() {
       const charRanges = [
-        [0x0020, 0x007F], // Basic Latin
-        [0x4E00, 0x9FFF], // CJK Unified Ideographs
-        [0x30A0, 0x30FF], // Katakana
+        [0x0020, 0x003F], // Basic Latin
+        [0x16A0, 0x16EA], // Runic
+        [0x4E00, 0x5A00], // CJK Unified Ideographs
+        [0x16A0, 0x16EA], // Runic
+        [0x16A0, 0x16EA], // Runic
+        [0x16A0, 0x16EA], // Runic
+        [0x16A0, 0x16EA], // Runic
       ];
 
       let charCode;
