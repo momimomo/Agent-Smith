@@ -31,6 +31,8 @@
     const columns = canvas.width / fontSize;
     const drops = [];
 
+    const fadeChars = []; // Added to keep track of fading characters
+
     for (let i = 0; i < columns; i++) {
       drops[i] = -1;
     }
@@ -112,6 +114,22 @@
       }
     }
 
+
+    function drawAsciiArt() {
+      ctx.fillStyle = '#00ff00';
+      ctx.font = `${fontSize}px monospace`;
+      const yOffset = (canvas.height / 2) - fontSize * (asciiArt.length / 2);
+      for (let i = 0; i < asciiArt.length; i++) {
+        const textWidth = ctx.measureText(asciiArt[i]).width;
+        const xOffset = (canvas.width - textWidth) / 2;
+        ctx.fillText(asciiArt[i], xOffset, yOffset + i * fontSize);
+      }
+    }
+
+    function smoothstep(edge0, edge1, x) {
+      const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+      return t * t * (3 - 2 * t);
+    }
     function drawMatrixRain() {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -120,7 +138,7 @@
       for (let i = 0; i < drops.length; i++) {
         const char = getRandomChar();
 
-        const progress = transitionProgress / transitionDuration;
+        const progress = smoothstep(0, 1, transitionProgress / transitionDuration);
         const angle = (i / drops.length) * 2 * Math.PI + progress * 2 * Math.PI;
         const radiusFactor = progress * 0.5;
         const maxRadius = Math.max(canvas.width, canvas.height) / 2;
@@ -135,10 +153,37 @@
           drops[i] = 0;
         }
 
+        // Fading character logic
+        if (Math.random() < 0.0025) { // Adjust probability to control how often characters fade
+          fadeChars.push({
+            char: char,
+            x: x,
+            y: y,
+            opacity: 1,
+            fadeSpeed: Math.random() * 0.01 + 0.005, // Adjust fade speed
+            glitchSpeed: Math.random() * 0.15 + 0.01 // Added glitch speed
+          });
+        }
+
         drops[i]++;
       }
-    }
 
+  // Draw fading characters
+  for (let i = fadeChars.length - 1; i >= 0; i--) {
+        ctx.fillStyle = `rgba(0, 255, 0, ${fadeChars[i].opacity})`;
+        ctx.fillText(fadeChars[i].char, fadeChars[i].x, fadeChars[i].y);
+        fadeChars[i].opacity -= fadeChars[i].fadeSpeed;
+
+        // Glitch effect: change character randomly
+        if (Math.random() < fadeChars[i].glitchSpeed) { // Adjust glitch probability
+          fadeChars[i].char = getRandomChar();
+        }
+
+        if (fadeChars[i].opacity <= 0) {
+          fadeChars.splice(i, 1);
+        }
+      }
+    }
     function draw() {
       if (asciiArtDisplayTime < maxAsciiArtDisplayTime) {
         drawAsciiArt();
